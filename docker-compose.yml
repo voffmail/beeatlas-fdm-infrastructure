@@ -508,6 +508,74 @@ services:
       - fdm-network
     restart: unless-stopped
 
+  fdm-pack-loader:
+    build:
+      context: ./services/fdm-pack-loader
+      dockerfile: Dockerfile
+    container_name: fdm-pack-loader-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./common.env
+    environment:
+      APP_AMBASSADOR_AUTH: "false"
+      SPRING_RABBITMQ_TEMPLATE_EXCHANGE: ${PACK_LOADER_RABBITMQ_EXCHANGE:-pack.loader.exchange}
+      SPRING_RABBITMQ_TEMPLATE_ROUTING_KEY: ${PACK_LOADER_RABBITMQ_ROUTING_KEY:-pack.loader.routing}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: pack_loader
+      SPRING_FLYWAY_DEFAULT_SCHEMA: pack_loader
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_CLEAN_DISABLED: "true"
+      OTEL_SDK_DISABLED: "true"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    ports:
+      - "${PACK_LOADER_APP_PORT:-8092}:8080"
+    networks:
+      - fdm-network
+    restart: unless-stopped
+
+  events-history:
+    build:
+      context: ./services/events-history
+      dockerfile: Dockerfile
+    container_name: events-history-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./common.env
+    environment:
+      APP_AMBASSADOR_AUTH: "false"
+      SPRING_RABBITMQ_TEMPLATE_EXCHANGE: ${EVENTS_HISTORY_RABBITMQ_EXCHANGE:-events.history.exchange}
+      SPRING_RABBITMQ_TEMPLATE_ROUTING_KEY: ${EVENTS_HISTORY_RABBITMQ_ROUTING_KEY:-events.history}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: entity_events
+      SPRING_FLYWAY_DEFAULT_SCHEMA: entity_events
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_CLEAN_DISABLED: "true"
+      OTEL_SDK_DISABLED: "true"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    ports:
+      - "${EVENTS_HISTORY_SERVICE_PORT:-8093}:8080"
+    networks:
+      - fdm-network
+    restart: unless-stopped
+
 networks:
   fdm-network:
     driver: bridge
