@@ -1,3 +1,7 @@
+# Запуск готовых образов из GHCR (конфигурация = docker-compose.yml, без локального build).
+#   docker compose -f docker-compose-run.yml pull
+#   docker compose -f docker-compose-run.yml up -d
+
 services:
   postgres:
     image: postgres:15-alpine
@@ -216,9 +220,7 @@ services:
     restart: unless-stopped
 
   gateway:
-    build:
-      context: ./services/gateway
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-fdm-gateway-service:latest
     container_name: gateway
     restart: unless-stopped
     ports:
@@ -248,9 +250,7 @@ services:
       - fdm-network
 
   fdm-auth-backend:
-    build:
-      context: ./services/fdm-auth-service
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-fdm-auth-service:latest
     container_name: fdm-auth-backend
     env_file:
       - ./common.env
@@ -280,9 +280,7 @@ services:
     restart: unless-stopped
 
   capability-backend:
-    build:
-      context: ./services/capability-service
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-capability-backend-service:latest
     container_name: capability-backend
     depends_on:
       postgres:
@@ -308,9 +306,7 @@ services:
     restart: unless-stopped
 
   architect-graph-service:
-    build:
-      context: ./services/architect-graph-service
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-architect-graph-service:latest
     container_name: architect-graph-service
     depends_on:
       postgres:
@@ -333,9 +329,7 @@ services:
     restart: unless-stopped
 
   products-service:
-    build:
-      context: ./services/products-service
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-fdm-products-service:latest
     container_name: products-service
     depends_on:
       rabbitmq:
@@ -363,9 +357,7 @@ services:
     restart: unless-stopped
 
   techradar-backend:
-    build:
-      context: ./services/techradar-service
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-fdm-techradar-service:latest
     container_name: techradar-backend
     env_file:
       - ./common.env
@@ -398,11 +390,7 @@ services:
       URL_ONPREMISES_BASE: http://on-premises:8080/api
       ONPREMISES_PASSWORD: password
       URL_VEGA: https://vega.vimpelcom.ru
-    build:
-      context: ./services/structurizr_backend
-      dockerfile: Dockerfile
-    volumes:
-      - ./services/structurizr_backend:/opt/structurizr_backend
+    image: ghcr.io/tech-beeline/beeatlas-structurizr-backend:latest
     ports:
       - "8086:8080"
     networks:
@@ -436,9 +424,7 @@ services:
       retries: 5
 
   cx-service:
-    build:
-      context: ./services/cx-service
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-fdm-cx-service:latest
     container_name: cx-service
     depends_on:
       postgres:
@@ -463,9 +449,7 @@ services:
     restart: unless-stopped
 
   notifications-service:
-    build:
-      context: ./services/notifications-service
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-notifications-management:latest
     container_name: notifications-service
     depends_on:
       postgres:
@@ -495,9 +479,7 @@ services:
     restart: unless-stopped
 
   document-service:
-    build:
-      context: ./services/document-service
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-document-service:latest
     container_name: document-service
     depends_on:
       postgres:
@@ -526,9 +508,7 @@ services:
     restart: unless-stopped
 
   fdm-pack-loader:
-    build:
-      context: ./services/fdm-pack-loader
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-fdm-pack-loader:latest
     container_name: fdm-pack-loader-app
     depends_on:
       postgres:
@@ -559,9 +539,7 @@ services:
     restart: unless-stopped
 
   events-history:
-    build:
-      context: ./services/events-history
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-events-history:latest
     container_name: events-history-app
     depends_on:
       postgres:
@@ -592,9 +570,7 @@ services:
     restart: unless-stopped
 
   fdm-bpm:
-    build:
-      context: ./services/fdm-bpm
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-fdm-bpm:latest
     container_name: fdm-bpm
     depends_on:
       postgres:
@@ -634,9 +610,7 @@ services:
     restart: unless-stopped
 
   ff-manager:
-    build:
-      context: ./services/ff-manager
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-ff-manager:latest
     container_name: ff-manager
     depends_on:
       postgres:
@@ -666,9 +640,7 @@ services:
     restart: unless-stopped
 
   obs-dashboard:
-    build:
-      context: ./services/obs-dashboard
-      dockerfile: Dockerfile
+    image: ghcr.io/tech-beeline/beeatlas-obs-dashboard:latest
     container_name: obs-dashboard
     depends_on:
       cx-service:
