@@ -1,0 +1,80 @@
+name: "proxy-mcp-exp"
+tenant: "default"
+
+routers:
+  - server: "amap-maps"
+    prefix: "/gateway/stdio-proxy"
+    cors:
+      allowOrigins:
+        - "*"
+      allowMethods:
+        - "GET"
+        - "POST"
+        - "OPTIONS"
+      allowHeaders:
+        - "Content-Type"
+        - "Authorization"
+        - "Mcp-Session-Id"
+        - "mcp-protocol-version"
+      exposeHeaders:
+        - "Mcp-Session-Id"
+        - "mcp-protocol-version"
+      allowCredentials: true
+  - server: "mock-user-sse"
+    prefix: "/gateway/sse-proxy"
+    cors:
+      allowOrigins:
+        - "*"
+      allowMethods:
+        - "GET"
+        - "POST"
+        - "OPTIONS"
+      allowHeaders:
+        - "Content-Type"
+        - "Authorization"
+        - "Mcp-Session-Id"
+        - "mcp-protocol-version"
+      exposeHeaders:
+        - "Mcp-Session-Id"
+        - "mcp-protocol-version"
+      allowCredentials: true
+  - server: "mock-user-mcp"
+    prefix: "/gateway/streamable-http-proxy"
+    cors:
+      allowOrigins:
+        - "*"
+      allowMethods:
+        - "GET"
+        - "POST"
+        - "OPTIONS"
+      allowHeaders:
+        - "Content-Type"
+        - "Authorization"
+        - "Mcp-Session-Id"
+        - "mcp-protocol-version"
+      exposeHeaders:
+        - "Mcp-Session-Id"
+        - "mcp-protocol-version"
+      allowCredentials: true
+
+mcpServers:
+  - type: "stdio"
+    name: "amap-maps"
+    command: "npx"
+    args:
+      - "-y"
+      - "@amap/amap-maps-mcp-server"
+    env:
+      AMAP_MAPS_API_KEY: '{{ env "AMAP_MAPS_API_KEY" }}'
+    policy: "onDemand"
+    preinstalled: true
+
+  - type: "sse"
+    name: "mock-user-sse"
+    url: "http://localhost:5237/sse"
+    policy: "onDemand"
+
+  - type: "streamable-http"  # unimplemented for now
+    name: "mock-user-mcp"
+    url: "http://localhost:5237/mcp"
+    policy: "onDemand"

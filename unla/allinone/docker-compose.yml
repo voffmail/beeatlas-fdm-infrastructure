@@ -1,0 +1,17 @@
+version: "3"
+services:
+  mcp-gateway:
+    image: ${IMAGE:-ghcr.io/amoylab/unla/allinone:latest}
+    ports:
+      - "8080:80"
+      - "5234:5234"
+      - "5235:5235"
+      - "5236:5236"
+    environment:
+      - ENV=production
+      - TZ=${TZ:-UTC}
+    volumes:
+      - ./configs:/app/configs
+      - ./data:/app/data
+      - ./.env.allinone:/app/.env
+    restart: unless-stopped
