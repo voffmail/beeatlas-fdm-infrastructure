@@ -41,19 +41,23 @@ services:
 
     healthcheck:
       test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
-      interval: 30s
+      interval: 10s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 40s
 
   redis:
     image: redis:7-alpine
     container_name: redis
     restart: unless-stopped
-    command: [ "redis-server", "--save", "", "--appendonly", "no" ]
+    command: [ "redis-server", "--save", "", "--appendonly", "no", "--requirepass", "redis-password" ]
     networks:
       - fdm-network
-    profiles:
-      - ${AUTHENTIC_AUTH:-false}
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "redis-password", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   authentik-postgres:
     image: postgres:15-alpine
@@ -89,6 +93,7 @@ services:
       AUTHENTIK_POSTGRESQL__USER: authentik
       AUTHENTIK_POSTGRESQL__PASSWORD: authentik
       AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_REDIS__PASSWORD: redis-password
       AUTHENTIK_SECRET_KEY: my-strong-secret-key
     ports:
       - "5000:9000"
@@ -101,7 +106,7 @@ services:
       authentik-postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     networks:
       - fdm-network
     profiles:
@@ -122,6 +127,7 @@ services:
       AUTHENTIK_POSTGRESQL__USER: authentik
       AUTHENTIK_POSTGRESQL__PASSWORD: authentik
       AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_REDIS__PASSWORD: redis-password
       AUTHENTIK_SECRET_KEY: my-strong-secret-key
     volumes:
       - ./authentik-blueprints:/blueprints/custom:ro
@@ -134,7 +140,7 @@ services:
       authentik-postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     networks:
       - fdm-network
     profiles:
@@ -223,6 +229,9 @@ services:
     image: ghcr.io/tech-beeline/beeatlas-fdm-gateway-service:latest
     container_name: gateway
     restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "8080:8080"
       - "8090:8090"
@@ -235,6 +244,7 @@ services:
       CORS_ENABLED: 'true'
       DEMO_AUTH: 'true'
       AUTHENTIC_AUTH: 'true'
+      QUEUE_USER_DROP_CACHE_NAME: user_drop_cache
     networks:
       - fdm-network
 
@@ -264,6 +274,8 @@ services:
       TECHUSER: "tech-user"
       TECHPASSWORD: "tech-password"
       FDM_AUTH_KAFKA_ENABLED: "false"
+      INTEGRATION_MYPROFILE_SERVER_URL: ${INTEGRATION_MYPROFILE_SERVER_URL:-https://myprofile.example.com}
+      INTEGRATION_MYPROFILE_TOKEN: ${INTEGRATION_MYPROFILE_TOKEN:-}
       OTEL_EXPORTER_OTLP_ENDPOINT:  # заменить на URL OTEL
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
@@ -315,10 +327,15 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file:
       - ./common.env
     environment:
       JAVA_OPTS: -Xmx512m -Xms256m
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_PASSWORD: redis-password
       SPRING_RABBITMQ_TEMPLATE_EXCHANGE: ${RABBITMQ_EXCHANGE:-capability.exchange}
       SPRING_RABBITMQ_TEMPLATE_ROUTING_KEY: ${RABBITMQ_ROUTING_KEY:-capability.routing}
       INTEGRATION_PRODUCT_SERVER_URL: http://products-service:8080
@@ -356,31 +373,31 @@ services:
       - fdm-network
     restart: unless-stopped
 
-  techradar-backend:
-    image: ghcr.io/tech-beeline/beeatlas-fdm-techradar-service:latest
-    container_name: techradar-backend
-    env_file:
-      - ./common.env
-    environment:
-      SPRING_JPA_HIBERNATE_DDL_AUTO: none
-      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: techradar
-      SPRING_FLYWAY_DEFAULT_SCHEMA: techradar
-      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
-      SPRING_FLYWAY_CLEAN_DISABLED: "true"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 5s
-      timeout: 3s
-      retries: 15
-      start_period: 180s
-    depends_on:
-      postgres:
-        condition: service_healthy
-    ports:
-      - "8085:8080"
-    networks:
-      - fdm-network
-    restart: unless-stopped
+#  techradar-backend:
+#    image: ghcr.io/tech-beeline/beeatlas-fdm-techradar-service:latest
+#    container_name: techradar-backend
+#    env_file:
+#      - ./common.env
+#    environment:
+#      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+#      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: techradar
+#      SPRING_FLYWAY_DEFAULT_SCHEMA: techradar
+#      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+#      SPRING_FLYWAY_CLEAN_DISABLED: "true"
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+#      interval: 5s
+#      timeout: 3s
+#      retries: 15
+#      start_period: 180s
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#    ports:
+#      - "8085:8080"
+#    networks:
+#      - fdm-network
+#    restart: unless-stopped
 
   structurizr-backend:
     tty: true

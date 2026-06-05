@@ -43,7 +43,7 @@
     { "name": "product_queue", "vhost": "/", "durable": true },
     { "name": "TECH_PRODUCT_RELATION", "vhost": "/", "durable": true },
     { "name": "someQueue", "vhost": "/", "durable": true },
-
+    { "name": "criteria_queue", "vhost": "/", "durable": true },
     { "name": "create_local_graph", "vhost": "/", "durable": true },
     { "name": "build_local_graph", "vhost": "/", "durable": true },
     { "name": "create_global_graph", "vhost": "/", "durable": true },
@@ -52,5 +52,26 @@
     { "name": "result_local_graph", "vhost": "/", "durable": true },
     { "name": "result_global_graph", "vhost": "/", "durable": true },
     { "name": "user_drop_cache", "vhost": "/", "durable": true }
+  ],
+  "exchanges": [
+    {
+      "name": "capability.exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "capability.exchange",
+      "vhost": "/",
+      "destination": "create_local_graph",
+      "destination_type": "queue",
+      "routing_key": "capability.routing",
+      "arguments": {}
+    }
   ]
 }
