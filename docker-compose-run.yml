@@ -672,8 +672,7 @@ services:
       PRODUCT_SERVICE_URL: http://products-service:8080
       GRAFANA_URL: ${INTEGRATION_GRAFANA_SERVER_URL:-http://grafana-service:8080}
       GRAFANA_ACCESS_TOKEN: ${INTEGRATION_GRAFANA_BEARER:-token}
-      E2E_TEMPLATE_URL: http://your-grafana-template-url
-      E2E_TEMAPLTE_UID: temaplateUID
+      E2E_TEMPLATE_URL: http://grafana-service:8080/d/local-e2e-template/demo
     ports:
       - "${OBS_DASHBOARD_SERVICE_PORT:-8096}:3000"
     networks:
