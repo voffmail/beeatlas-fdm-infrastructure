@@ -273,9 +273,9 @@ services:
       AUTHBASIC: "Basic xxxxxxxx"
       TECHUSER: "tech-user"
       TECHPASSWORD: "tech-password"
-      FDM_AUTH_KAFKA_ENABLED: "false"
-      INTEGRATION_MYPROFILE_SERVER_URL: ${INTEGRATION_MYPROFILE_SERVER_URL:-https://myprofile}
-      INTEGRATION_MYPROFILE_TOKEN: ${INTEGRATION_MYPROFILE_TOKEN:-token}
+      FDM_AUTH_KAFKA_ENABLED: false
+      INTEGRATION_MYPROFILE_SERVER_URL: https://myprofile
+      INTEGRATION_MYPROFILE_TOKEN: token
       OTEL_EXPORTER_OTLP_ENDPOINT:  # заменить на URL OTEL
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
@@ -699,7 +699,9 @@ services:
       CX_SERVICE_URL: http://cx-service:8080
       PRODUCT_SERVICE_URL: http://products-service:8080
       GRAFANA_URL: ${INTEGRATION_GRAFANA_SERVER_URL:-http://grafana-service:8080}
-      GRAFANA_ACCESS_TOKEN: ${INTEGRATION_GRAFANA_BEARER:-}
+      GRAFANA_ACCESS_TOKEN: ${INTEGRATION_GRAFANA_BEARER:-token}
+      E2E_TEMPLATE_URL: http://your-grafana-template-url
+      E2E_TEMAPLTE_UID: temaplateUID
     ports:
       - "${OBS_DASHBOARD_SERVICE_PORT:-8096}:3000"
     networks:

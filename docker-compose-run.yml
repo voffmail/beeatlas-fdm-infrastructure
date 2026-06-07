@@ -273,9 +273,9 @@ services:
       AUTHBASIC: "Basic xxxxxxxx"
       TECHUSER: "tech-user"
       TECHPASSWORD: "tech-password"
-      FDM_AUTH_KAFKA_ENABLED: "false"
-      INTEGRATION_MYPROFILE_SERVER_URL: ${INTEGRATION_MYPROFILE_SERVER_URL:-https://myprofile.example.com}
-      INTEGRATION_MYPROFILE_TOKEN: ${INTEGRATION_MYPROFILE_TOKEN:-}
+      FDM_AUTH_KAFKA_ENABLED: false
+      INTEGRATION_MYPROFILE_SERVER_URL: https://myprofile
+      INTEGRATION_MYPROFILE_TOKEN: token
       OTEL_EXPORTER_OTLP_ENDPOINT:  # заменить на URL OTEL
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
@@ -373,31 +373,31 @@ services:
       - fdm-network
     restart: unless-stopped
 
-#  techradar-backend:
-#    image: ghcr.io/tech-beeline/beeatlas-fdm-techradar-service:latest
-#    container_name: techradar-backend
-#    env_file:
-#      - ./common.env
-#    environment:
-#      SPRING_JPA_HIBERNATE_DDL_AUTO: none
-#      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: techradar
-#      SPRING_FLYWAY_DEFAULT_SCHEMA: techradar
-#      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
-#      SPRING_FLYWAY_CLEAN_DISABLED: "true"
-#    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-#      interval: 5s
-#      timeout: 3s
-#      retries: 15
-#      start_period: 180s
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#    ports:
-#      - "8085:8080"
-#    networks:
-#      - fdm-network
-#    restart: unless-stopped
+  techradar-backend:
+    image: ghcr.io/tech-beeline/beeatlas-fdm-techradar-service:latest
+    container_name: techradar-backend
+    env_file:
+      - ./common.env
+    environment:
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: techradar
+      SPRING_FLYWAY_DEFAULT_SCHEMA: techradar
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_CLEAN_DISABLED: "true"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 180s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8085:8080"
+    networks:
+      - fdm-network
+    restart: unless-stopped
 
   structurizr-backend:
     tty: true
@@ -671,7 +671,9 @@ services:
       CX_SERVICE_URL: http://cx-service:8080
       PRODUCT_SERVICE_URL: http://products-service:8080
       GRAFANA_URL: ${INTEGRATION_GRAFANA_SERVER_URL:-http://grafana-service:8080}
-      GRAFANA_ACCESS_TOKEN: ${INTEGRATION_GRAFANA_BEARER:-}
+      GRAFANA_ACCESS_TOKEN: ${INTEGRATION_GRAFANA_BEARER:-token}
+      E2E_TEMPLATE_URL: http://your-grafana-template-url
+      E2E_TEMAPLTE_UID: temaplateUID
     ports:
       - "${OBS_DASHBOARD_SERVICE_PORT:-8096}:3000"
     networks:
