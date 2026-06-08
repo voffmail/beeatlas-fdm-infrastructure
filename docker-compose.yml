@@ -448,6 +448,11 @@ services:
       URL_ONPREMISES_BASE: http://on-premises:8080/api
       ONPREMISES_PASSWORD: password
       URL_VEGA: https://vega.vimpelcom.ru
+      URL_DOCUMENTS: http://document-service:8080
+      URL_PRODUCTS: http://products-service:8080
+      CAPABILITY_API_URL: http://capability-backend:8080
+      URL_GRAPH: http://architect-graph-service:8080
+      URL_TECHRADAR: http://techradar-backend:8080
     build:
       context: ./services/structurizr_backend
       dockerfile: Dockerfile

@@ -30,7 +30,7 @@ servers:
       - getCriteriaList
       - getBusinessCapabilityOrderById
       - getBusinessCapabilityHistory
-      - getTechCapabilityResp
+      - findTechCapabilitiesByProductId
       - getParentsById
       - getBusinessCapabilities
       - getBusinessCapabilityTreeById
@@ -83,7 +83,6 @@ servers:
       - getProductInfraContainsName
       - getProductNfr
       - getProductPatterns
-      - getProductsByCode
       - getProductsByIds
       - getProductsFromMapic
       - getProductsFromStructurizr
@@ -93,7 +92,7 @@ servers:
       - getProductsByTechId
       - getServiceSecretByApiKey
       - getSourceMetrics
-      - getTCIdsByProductId
+      - getImplementedTechCapabilitiesByProductId
       - getTcByContainerProduct
       - requestToMapic
       - searchInfra
@@ -121,7 +120,7 @@ servers:
       - getContextElements
       - getInfluenceElements
     config:
-      url: http://fdm-gateway-dev-eafdmmart.apps.yd-m6-kt22.vimpelcom.ru
+      url: http://eafdmmart-prod-fdm-gateway
 tools:
   - name: getCapabilityMapById
     description: Возвращает карту возможностей по идентификатору (id).
@@ -269,8 +268,8 @@ tools:
           type: ''
     requestBody: ''
     responseBody: '{{.Response.Body}}'
-  - name: getTechCapabilityResp
-    description: Возвращает ТС, реализованные в продукте, за которые система ответственна.
+  - name: findTechCapabilitiesByProductId
+    description: Возвращает технические возможности (ТС), которыми владеет продукт.
     method: GET
     endpoint: '{{.Config.url}}/capability/api/v1/tech-capabilities/product/{{.Args.id}}'
     headers:
@@ -281,7 +280,7 @@ tools:
         position: path
         required: true
         type: number
-        description: Идентификатор продукта.
+        description: id продукта
         default: ''
         items:
           type: ''
@@ -1268,24 +1267,6 @@ tools:
           type: string
     requestBody: ''
     responseBody: '{{.Response.Body}}'
-  - name: getProductsByCode
-    description: Полная карточка продукта по alias. Путь `code` — alias (код) продукта.
-    method: GET
-    endpoint: '{{.Config.url}}/product/api/v1/product/{{.Args.code}}'
-    headers:
-      Authorization: '{{.Request.Headers.Authorization}}'
-      Content-Type: application/json
-    args:
-      - name: code
-        position: path
-        required: true
-        type: string
-        description: Alias продукта
-        default: ''
-        items:
-          type: ''
-    requestBody: ''
-    responseBody: '{{.Response.Body}}'
   - name: getProductsByIds
     description: Получить продукты по списку id
     method: GET
@@ -1435,7 +1416,7 @@ tools:
       Content-Type: application/json
     requestBody: ''
     responseBody: '{{.Response.Body}}'
-  - name: getTCIdsByProductId
+  - name: getImplementedTechCapabilitiesByProductId
     description: Список реализованных ТС (tech-capability) по продукту
     method: GET
     endpoint: '{{.Config.url}}/product/api/v1/product/{{.Args.id}}/tc-implementation'
@@ -1446,8 +1427,8 @@ tools:
       - name: id
         position: path
         required: true
-        type: integer
-        description: ''
+        type: number
+        description: id продукта
         default: ''
         items:
           type: int32
@@ -2021,4 +2002,4 @@ tools:
 prompts: []
 mcpServers: []
 createdAt: '2026-05-06T12:50:31.809Z'
-updatedAt: '2026-05-21T09:21:23.832463326Z'
+updatedAt: '2026-06-08T10:13:19.202373756Z'
