@@ -67,8 +67,6 @@ services:
       POSTGRES_USER: authentik
       POSTGRES_PASSWORD: authentik
       POSTGRES_DB: authentik_db
-    profiles:
-      - ${AUTHENTIC_AUTH:-false}
     volumes:
       - authentik-postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -105,8 +103,6 @@ services:
         condition: service_healthy
     networks:
       - fdm-network
-    profiles:
-      - ${AUTHENTIC_AUTH:-false}
 
   authentik-worker:
     image: ghcr.io/goauthentik/server:2025.10.2
@@ -125,6 +121,7 @@ services:
       AUTHENTIK_REDIS__HOST: redis
       AUTHENTIK_REDIS__PASSWORD: redis-password
       AUTHENTIK_SECRET_KEY: my-strong-secret-key
+      FDM_FRONTEND_URL: ${FDM_FRONTEND_URL:-http://localhost:3000}
     volumes:
       - ./authentik-blueprints:/blueprints/custom:ro
       - authentik-media:/media
@@ -139,8 +136,6 @@ services:
         condition: service_healthy
     networks:
       - fdm-network
-    profiles:
-      - ${AUTHENTIC_AUTH:-false}
 
   neo4j:
     image: neo4j:5-community
@@ -251,6 +246,8 @@ services:
     container_name: gateway
     restart: unless-stopped
     depends_on:
+      fdm-auth-backend:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     ports:
@@ -264,19 +261,44 @@ services:
       SPRING_PROFILES_ACTIVE: local
       CORS_ENABLED: 'true'
       DEMO_AUTH: 'true'
-      AUTHENTIC_AUTH: 'true'
+      AUTHENTIC_AUTH: 'false'
       QUEUE_USER_DROP_CACHE_NAME: user_drop_cache
     networks:
       - fdm-network
 
   beeatlas-frontend:
-    image: ddzuba/frieren_frontend:x86
+    build:
+      context: ../beeatlas-prospect-frontend
+      dockerfile: Dockerfile
     container_name: beeatlas-frontend
     restart: unless-stopped
+    depends_on:
+      gateway:
+        condition: service_started
+      authentik-server:
+        condition: service_started
     ports:
-      - "3000:3000"
-    env_file:
-      - ./common.env
+      - "3000:8080"
+    environment:
+      FLAG_IS_PROD: "false"
+      FLAG_IS_DEMO_STAND: "true"
+      FLAG_API_URL: ""
+      FLAG_AUTHENTIK_URL: http://localhost:5000
+      FLAG_AUTHENTIK_CLIENT_ID: SxbmzvcDJHqs415xgqo8hPQh6CtHvop5jFGF1Wb2
+      FLAG_DOC_SERVICE_URL: http://localhost:8097
+      NGINX_LOCATION_API_GATEWAY: http://gateway:8080
+      NGINX_LOCATION_API: http://gateway:8080
+    networks:
+      - fdm-network
+
+  beeatlas-doc:
+    build:
+      context: ../beeatlas-doc
+      dockerfile: Dockerfile
+    container_name: beeatlas-doc
+    restart: unless-stopped
+    ports:
+      - "${BEEATLAS_DOC_SERVICE_PORT:-8097}:8080"
     networks:
       - fdm-network
 
@@ -698,6 +720,27 @@ services:
       - fdm-network
     restart: unless-stopped
 
+  fdm-bpm-local-init:
+    image: postgres:15-alpine
+    container_name: fdm-bpm-local-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+      fdm-bpm:
+        condition: service_healthy
+    volumes:
+      - ./scripts/fdm-bpm-local-urls.sql:/init.sql:ro
+    environment:
+      PGPASSWORD: postgres
+    entrypoint: >
+      /bin/sh -c "
+      until psql -h postgres -U postgres -d fdm_db -tAc \"SELECT 1 FROM information_schema.tables WHERE table_schema='processes' AND table_name='application_type_enum'\" | grep -q 1; do sleep 2; done &&
+      psql -h postgres -U postgres -d fdm_db -v ON_ERROR_STOP=1 -f /init.sql
+      "
+    restart: "no"
+    networks:
+      - fdm-network
+
   ff-manager:
     build:
       context: ./services/ff-manager
@@ -720,7 +763,7 @@ services:
       FF_DOCUMENTS_API_BASE_URL: http://document-service:8080
     healthcheck:
       test: [ "CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health').read()\" || exit 1" ]
-      interval: 10s
+      interval: 15s
       timeout: 5s
       retries: 12
       start_period: 30s
