@@ -58,3 +58,11 @@
 	path = services/obs-dashboard
 	url = https://github.com/tech-beeline/beeatlas-obs-dashboard.git
 	branch = main
+[submodule "services/prospect-frontend"]
+	path = services/prospect-frontend
+	url = https://github.com/tech-beeline/beeatlas-prospect-frontend.git
+	branch = main
+[submodule "services/beeatlas-doc"]
+	path = services/beeatlas-doc
+	url = https://github.com/tech-beeline/beeatlas-doc.git
+	branch = main
