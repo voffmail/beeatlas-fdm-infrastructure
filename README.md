@@ -42,16 +42,18 @@
 
 | Файл | Когда использовать |
 |------|-------------------|
+| **`docker-compose-run.yml`** | **Рекомендуется** — запуск **готовых образов** из GHCR (`ghcr.io/tech-beeline/...:latest`) |
 | **`docker-compose.yml`** | Локальная **сборка** из submodules (`services/*/Dockerfile`) |
-| **`docker-compose-run.yml`** | Запуск **готовых образов** из GHCR (`ghcr.io/tech-beeline/...:latest`) |
+
+> **Рекомендация:** для первого запуска и повседневной работы со стендом предпочтительнее **`docker-compose-run.yml`**. Не нужна долгая Maven-сборка Java-сервисов, меньше проблем с сетью и зависимостями при `docker compose build`. Файл `docker-compose.yml` используйте, когда меняете код в submodule и нужно проверить свежие изменения до push образа в GHCR.
 
 ```bash
-# Локальная сборка
-docker compose up -d --build
-
-# Готовые образы
+# Рекомендуемый способ — готовые образы
 docker compose -f docker-compose-run.yml pull
 docker compose -f docker-compose-run.yml up -d
+
+# Локальная сборка (разработка)
+docker compose up -d --build
 ```
 
 Обновление всех образов из registry:
@@ -145,17 +147,17 @@ git submodule update --init --recursive
 
 Authentik и остальная инфраструктура поднимаются **всегда** — отдельный профиль Compose или флаги при старте не нужны.
 
-**Локальная сборка:**
-
-```bash
-docker compose up -d --build
-```
-
-**Готовые образы:**
+**Готовые образы (рекомендуется):**
 
 ```bash
 docker compose -f docker-compose-run.yml pull
 docker compose -f docker-compose-run.yml up -d
+```
+
+**Локальная сборка**:
+
+```bash
+docker compose up -d --build
 ```
 
 После старта дождитесь `healthy` у `postgres`, `fdm-auth-backend`, `gateway`, `authentik-server`, затем переходите к [разделу 7](#7-authentik--вход-в-приложение) — там пошаговый вход в UI.
@@ -240,9 +242,11 @@ sequenceDiagram
 **Шаг 1.** Поднимите стенд (см. [раздел 5](#52-запуск-стенда)):
 
 ```bash
-docker compose up -d --build
-# или
+# рекомендуется
+docker compose -f docker-compose-run.yml pull
 docker compose -f docker-compose-run.yml up -d
+# или локальная сборка
+docker compose up -d --build
 ```
 
 **Шаг 2.** Дождитесь готовности сервисов:

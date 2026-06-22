@@ -19,10 +19,11 @@ entries:
     attrs:
       email: default@beeline.ru
       name: Ivan Ivanov
-      Employee-Number: "1"
-      family_name: Ivan
-      given_name: Ivanov
-      winaccountname: defaultUser
+      attributes:
+        Employee-Number: "1"
+        family_name: Ivan
+        given_name: Ivanov
+        winaccountname: defaultUser
 
   - model: authentik_providers_oauth2.scopemapping
     identifiers:
