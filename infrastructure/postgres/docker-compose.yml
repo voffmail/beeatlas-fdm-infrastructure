@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    command: postgres -c 'max_connections=200'
+    container_name: fdm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fdm_db
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+      - ./init-schemas.sql:/docker-entrypoint-initdb.d/init-schemas.sql
+    ports:
+      - "5433:5432"
+    networks:
+      - fdm-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5

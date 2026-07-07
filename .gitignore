@@ -4,6 +4,7 @@ infrastructure/vscode/workspace/
 target/
 vscode/vscode-extensions/
 certs/
+infrastructure/postgres/postgres-data
 
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
