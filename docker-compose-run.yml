@@ -1,6 +1,6 @@
 
 include:
-  - ./3rd-party/n8n/compose.n8n.yml
+  - ./infrastructure/n8n/compose.n8n.yml
 
 services:
   postgres:
