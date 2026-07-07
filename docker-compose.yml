@@ -1,5 +1,3 @@
-version: '3.9'
-
 include:
 - ./infrastructure/n8n/compose.n8n.yml
 - ./infrastructure/vscode/docker-compose.yml
