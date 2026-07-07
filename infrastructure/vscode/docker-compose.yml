@@ -1,13 +1,13 @@
 services:
-  code-server:
+  vscode:
     build:
       context: .
       args:
         USER_UID: 1000
         USER_GID: 1000
-    container_name: vscode-custom
+    container_name: vscode
     ports:
-      - "8080:8080"
+      - "8088:8080"
     environment:
       - PASSWORD=my_secure_password
       - WORKSPACE=workspace
@@ -18,5 +18,7 @@ services:
       - ./vscode-extensions:/home/vscode/.local/share/code-server/extensions
       # Монтируем локальную папку с сертификатами (если есть)
       - ./certs:/certs:ro
+    networks:
+      - fdm-network
     restart: unless-stopped
 

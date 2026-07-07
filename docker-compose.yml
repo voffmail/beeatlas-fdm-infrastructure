@@ -1,5 +1,6 @@
 include:
   - ./infrastructure/n8n/compose.n8n.yml
+  - ./infrastructure/vscode/docker-compose.yml
 
 services:
   postgres:
@@ -802,28 +803,6 @@ services:
       - fdm-network
     restart: unless-stopped
 
-  vscode:
-    build:
-      context: .infrastructure/vscode
-      args:
-        USER_UID: 1000
-        USER_GID: 1000
-    container_name: vscode
-    ports:
-      - "8088:8080"
-    environment:
-      - PASSWORD=my_secure_password
-      - WORKSPACE=workspace
-    volumes:
-      # Монтируем папку с проектами
-      - ./infrastructure/vscode/workspace:/home/vscode/workspace
-      # Том для расширений (сохраняются между перезапусками)
-      - ./infrastructure/vscode/vscode-extensions:/home/vscode/.local/share/code-server/extensions
-      # Монтируем локальную папку с сертификатами (если есть)
-      - ./certs:/certs:ro
-    networks:
-      - fdm-network
-    restart: unless-stopped
 
 networks:
   fdm-network:
