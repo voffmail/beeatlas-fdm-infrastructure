@@ -3,29 +3,9 @@ include:
   - ./infrastructure/n8n/compose.n8n.yml
   - ./infrastructure/vscode/docker-compose.yml
   - ./infrastructure/postgres/docker-compose.yml
+  - ./infrastructure/rabbitmq/docker-compose.yml
 
 services:
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: fdm-rabbitmq
-    restart: unless-stopped
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
-      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-    networks:
-      - fdm-network
-
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
-
   redis:
     image: redis:7-alpine
     container_name: redis
