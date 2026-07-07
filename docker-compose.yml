@@ -802,13 +802,13 @@ services:
       - fdm-network
     restart: unless-stopped
 
-  web-ide:
+  vscode:
     build:
-      context: ./web-ide
+      context: .infrastructure/vscode
       args:
         USER_UID: 1000
         USER_GID: 1000
-    container_name: web-ide
+    container_name: vscode
     ports:
       - "8088:8080"
     environment:
@@ -816,9 +816,9 @@ services:
       - WORKSPACE=workspace
     volumes:
       # Монтируем папку с проектами
-      - ./workspace:/home/vscode/workspace
+      - ./infrastructure/vscode/workspace:/home/vscode/workspace
       # Том для расширений (сохраняются между перезапусками)
-      - ./web-ide/vscode-extensions:/home/vscode/.local/share/code-server/extensions
+      - ./infrastructure/vscode/vscode-extensions:/home/vscode/.local/share/code-server/extensions
       # Монтируем локальную папку с сертификатами (если есть)
       - ./certs:/certs:ro
     networks:
